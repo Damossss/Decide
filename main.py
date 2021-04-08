@@ -1,17 +1,26 @@
 import time
-import sys
 import random
+import sys
 
 def Start():
   print("Welcome to my horror game.")
-  name = input("What is your name? "'\n')
+  Player.name = input("What is your name? "'\n')
   time.sleep(0.2)
-  print("Hello,", name)
+  print("Hello,", Player.name)
   time.sleep(0.2)
+  Player.hp = 10
+  Player.dmg_min = 1
+  Player.dmg_max = 2
+  Player.defe = 1
+  Player.coins = 0
+  Player.bandage = False
+  Player.combat = False
+  Player.lvl = 1.0
   print("You are starting with {} health, ( {} - {} ) damage, {} defense, {} coins.".format(Player.hp, Player.dmg_min, Player.dmg_max, Player.defe, Player.coins))
   time.sleep(0.2)
-  ans = input("Ready to start? Y or N "'\n').lower()
-  if ans == "y":
+  ans = input("Ready to start? (yes/no)"'\n')
+  if ans == "yes":
+    RandomLoot()
     time.sleep(0.2)
     ActOne()
     time.sleep(1)
@@ -19,15 +28,28 @@ def Start():
   else:
     print("Pussy...")
 
-class Player:
+def End():
+  time.sleep(6)
+  print("YOU DIED")
+  time.sleep(1)
+  ans = input("Wanna try again? (yes/no)"'\n')
+  if ans == "yes":
+    Start()
+  else:
+    print("Pussy...)")
+    sys.exit()
+
+class Player():
   hp = 10
   dmg_min = 1
   dmg_max = 2
   defe = 1
+  lvl = 1
+
+  ### INVENTORY ###
   coins = 0
   bandage = False
   combat = False
-  lvl = 1.0
   
 class Enemy:
    def __init__(self, hp, dmg, defe):
@@ -66,10 +88,14 @@ def Combat(hp, dmg_min, dmg_max, defe):
       time.sleep(1)
       ans = input("...would you like another try? (yes/no) "'\n')
       if ans == "yes":
-        ActOne()
+        Start()
       else:
         print("Pussy...")
+        sys.exit()
     time.sleep(2)
+  if Player.bandage == True:
+    Player.hp += 3
+    print("You use the bandage your have in your bag. Your heal yourself by 3, you now have {} health.".format(Player.hp))
   print("You continue on your journey...")
   time.sleep(2)
 
@@ -148,26 +174,26 @@ def Gamble():
       time.sleep(0.2)
       if bet <= Player.coins: 
         Player.coins -= bet
-        price = round(bet * 1.2)
+        price = round(bet * 1.4)
         playing = True
-        print("You are betting {}. You can win {} coins.".format(bet, price))
+        print("You are betting {}. You can win {} coins.".format(bet, price-bet))
         player_sum = 0
         oponent_sum = 0
+        time.sleep(0.7)
         while playing == True:
           player_throw = random.randrange(30, 180, 10)
           player_sum += player_throw
           oponent_throw = random.randrange(30, 180, 10)
           oponent_sum += oponent_throw
-          time.sleep(0.3)
           print("You are throwing {} points. You now have {} points.".format(player_throw, player_sum))
-          time.sleep(0.3)
+          time.sleep(0.7)
           if player_sum >= 500:
             Player.coins += price
-            print("You won! You earn {} coins. Now you have {} coins!".format(price, Player.coins))
+            print("You won! You earn {} coins. Now you have {} coins!".format(price-bet, Player.coins))
             playing == False
             break
           print("Oponent is throwing {} points. He has {} points.".format(oponent_throw, oponent_sum))
-          time.sleep(0.3)
+          time.sleep(0.7)
           if oponent_sum >= 500:
             print("You lost! Better luck next time...")
             time.sleep(0.2)
@@ -179,31 +205,114 @@ def Gamble():
     else:
       leave = True
 
-
+def RandomLoot():
+  loot_list = ["Whetstone", "Chainmail", "Axe", "Shield"]
+  loot = random.choice(loot_list)
+  if loot == loot_list[0]:
+    Player.dmg_min+= 1 
+    Player.dmg_max += 1
+    print("You found a {}. With that, your damage is increased by 1! You now have {} - {} damage.".format(loot, Player.dmg_min, Player.dmg_max))
+  elif loot == loot_list[1]:
+    Player.defe += 1
+    print("You found a {}, your defense is increased by 1! You now have {} defense.".format(loot, Player.defe))
+  elif loot == loot_list[2]:
+    axe_min = 2
+    axe_max = 4
+    if Player.dmg_min < axe_min and Player.dmg_max < axe_max:
+      Player.dmg_min = axe_min
+      Player.dmg_max = axe_max
+      print("You found an {}! It looks stronger than your current weapon. You now have {} - {} damage.".format(loot, Player.dmg_min, Player.dmg_max))
+  elif loot == loot_list[3]:
+    Player.defe += 1
+    print("You found a {}! It looks sturdy. Your defense is increased by 1. You now have {} defense.".format(loot, Player.defe))
 
 def Quest(item, location, reward):
   item = item
   location = location
   reward = reward
-  ans = input("Greetings, traveller. If you want to earn some coin, I have something for ya. I lost {} at the {} narby. Bring it to me, and I will give you {} coins. Would you like to help me? (yes/no)"'\n'.format(item, location, reward))
+  have_item = False
+  ans = input("Greetings, traveller. If you want to earn some coin, I have something for ya. I lost {} at the {} narby. Bring it to me, and I will give you {} coins. It may be dangerous... Would you like to help me? (yes/no)"'\n'.format(item, location, reward))
   time.sleep(0.2)
   if ans == "yes":
     print("Great! I will show you the way...")
     time.sleep(0.3)
-    if location == "farm":
-      ans = input("You stand in front of a farm. It looks abandoned. You can either go in or check around. (in/around)"'\n')
-      if ans == "in":
-        ans = input("You are opening the front door. When you walk in, you see a big mess. Windows are broken, furniture is all around the floor. ")
-    elif location == "cave": 
-      print("")
-    else: #GRAVEYARD
-      print("")
+    leave = False
+    while leave == False:
+      if location == "farm":
+        ans = input("You stand in front of a farm. It looks abandoned. You can either go in or check around. (in/around)"'\n')
+        if ans == "in":
+          ans = input("You are opening the front door. When you walk in, you see a big mess. Windows are broken, furniture is all around the floor. Something is behind you. You turn around. It jumps on you. You unsheet your weapon and get ready for combat...")
+          Combat(7,2,3,2)
+          input("After the fight you see the {} tavernkeeper asked you to bring him back on him. You quickly take it.")
+          have_item = True
+          ans = input("You can either leave or check the farm. (check/leave)"'\n')
+          if ans == "check":
+            print("While scavenging the farm, you find a pouch with 3 coins!")
+            time.sleep(1)
+            ans = input("You can continue searching or leave. Sun sets soon... (continue/leave)"'\n')
+            if ans == "continue":
+              print("Outside is already dark... but the search was worth it. You found ")
+            else:
+              print("You are walking away. You have your reward, let's not push your luck...")
+          else:
+            print("You are walking away. You have your reward, let's not push your luck...")
+            time.sleep(2)
+            leave = True
+      elif location == "cave": 
+        leave_loc = False
+        ans = input("You stand in front of a cave. You see blood trails leading into the cave. It is certain that something will be there... Will you take the risk? (yes/no)"'\n')
+        if ans == "yes":
+          print("You walk in... Blood is all over the floor and walls. Guts are making you sick.")
+          went_right = False
+          while leave_loc == False:
+            ans = input("You see two ways. The left way leads to a bigger room with dim light. The right way leads is dark and seems lifeless. But who knows what is hiding in there... You can still go away. (left/right/away)"'\n')
+            if ans == "left":
+              ans = input("You go to the left. The sounds are getting louder and louder. You see a creature eating something at a fireplace. You see the {} tavernkeeper asked you to bring him back... Fortunately, the creature hasn't noticed you. You can fight it or go back. (fight, back)"'\n'.format(item))
+              if ans == "fight":
+                print("You are approaching the creature. It stops eating and grunts. Prepare for the battle...")
+                Combat(7, 1, 3, 2)
+                have_item = True
+                print("After you the defeated creature, you see what it was eating. A human. Better take that {} and go away...".format(item))
+                leave = True
+                leave_loc = True
+              else:
+                print("You are going back to the entrance.")
+            elif ans == "right":
+              if went_right == False:
+                Player.hp -= 1
+                print("You are going right. For a while you see nothing. As your eyes get used to the darkness, you see bones and pickaxes. Looks like this cave was a mine. You are searching the ground and find 2 coins! Unfortunately, a rat bite you and you loose 1 health. You now have {} health.".format(Player.hp))
+                went_right = True
+              else:
+                print("You alredy went there...")
+            else:
+              print("You are leaving the cave.")
+              leave = True
+              leave_loc = True
+        else:
+          print("You are leaving this place. Maybe only death awaits you there...")
+          leave = True
+      else: #GRAVEYARD
+        print("")
+    if have_item == True:
+      print("You get back to the tavern. Tavernkeeper is surprised you cambe back in one piece. You give him the {} and he gives you {} coins. Maybe you can buy new gear...".format(item, reward))
+      Player.coins += reward
+      Player.lvl = 2
+    else:
+      print("You ran away? Can't really blame you... Come again later, I will always have something for you.")
+
   else:
     print("Ok, I guess you can't be bothered...")
     
-
+def Talk():
+  leave = False
+  while leave == False:
+    print("You go to the tavernkeeper. Maybe he has something to say...")
+    Quest("necklace", "cave", 6)
+    leave = True
 
 def ActOne():
+    print("You are starting with {} health, ( {} - {} ) damage, {} defense, {} coins.".format(Player.hp, Player.dmg_min, Player.dmg_max, Player.defe, Player.coins))
+
     ans = input("You find yourself in the middle of a forest. You are disoriented and your head hurts. How did you get here? You can see human footsteps and a lake in a distance. What are you going to do? (steps/lake) "'\n')
     time.sleep(0.2)
     if ans == "lake":
@@ -215,6 +324,7 @@ def ActOne():
         if ans == "faster":
           print("Your swimming attracted piranhas. They bite you and you loose 2 HP.")
           Player.hp -= 2
+          End()
           time.sleep(0.2)
           print("Your health is {}.".format(Player.hp))
         else: #CALM
@@ -316,19 +426,15 @@ def ActOne():
     
     else:
       print("You follow the footsteps through the forest. Scary sounds are echoing around you. You feel an urge to look back. When you turn around to look behing you, your body freezes as you look into the red and lifeless eyes. Sudden pain strikes through your body, you can no longer move. You see the world spin around. Your detached head is landing on the ground... The horror is over.")
-      time.sleep(6)
-      ans = input("...would you like another try? (yes/no) "'\n')
-      if ans == "yes":
-        ActOne()
-      else:
-        print("Pussy...")
+      End()
 
 def ActTwo():
-  print("After a few hours you stand in front of a tavern. The tavern sits on a crossroad. It doesn't look like the shack you saw. You hear... voices? You come in. The place is full of people, four, to be exact. Normal people. A tavernkeeper looks at you. The other three men are not paying any attention to you. They are just staring at their beer. You are finally asked by the tavernkeeper.")
+  print("After a few hours you stand in front of a tavern. The tavern sits on a crossroad. It doesn't look like the shack you saw. You hear... voices? You come in. The place is full of people, four, to be exact. Normal people. A tavernkeeper looks at you. The other three men are not paying any attention to you. They are just playing something. You are finally asked by the tavernkeeper.")
   time.sleep(3)
-  print("'Who are you?', he asked. 'My name is {}, I woke up in the forest nearby and don't know how I got here... Tell me, what is happening here?'. The taverkeeper stares at you and answers: 'Interesting. This town is haunted. Dunno if you encountered it, but we are plagued by cursed creatures. It was maybe a month ago. The sky turned green and some people... just begun changing. They were screaming, disgusting to hear. Their bodies were changing... Ever since, we are hiding over here. For some reason they can't go away from that forest. Because of that incident, we are forbidden from other towns. They think we are cursed and attack us on sight...'".format(Start().name))
+  print("'Who are you?', he asked. 'My name is {}, I woke up in the forest nearby and don't know how I got here... Tell me, what is happening here?'. The taverkeeper stares at you and answers: 'Interesting. This town is haunted. Dunno if you encountered it, but we are plagued by cursed creatures. It was maybe a month ago. The sky turned green and some people... just begun changing. They were screaming, disgusting to hear. Their bodies were changing... Ever since, we are hiding over here. For some reason they can't go away from that forest. Because of that incident, we are forbidden from ot her towns. They think we are cursed and attack us on sight...'".format(Player.name))
   time.sleep(5)
-  ans = input("Now that he is talking about that, you remember a green sky and roars. Unfortunately, nothing else...")
+  print("Now that he is talking about that, you remember a green sky and roars. Unfortunately, nothing else...")
+  Tavern()
 
 Start()
 
