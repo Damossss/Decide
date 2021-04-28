@@ -1,0 +1,9 @@
+Hello.
+
+This is my first attempt to do something in Python. I am learning Python during full-time job, so the activity is a little bit irregular. 
+
+I, personally, have never played text games in my childhood, but I loved RPGs. So I decided to do a text game with RPG elements. And since this type of games aren't that complex,
+I thought I would give it a shot. Starting small, only print() and input() and eventually, I implemented some kind of random numbers, combat, loot and quest types. 
+Experimenting with files I even added a basic save/load system. I definitely look forward to the process of implementing music to this game.
+
+I hope that this project will eventually become bigger, more interesting and, hopefully, complete.  
